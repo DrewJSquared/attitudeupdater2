@@ -1,4 +1,17 @@
-# attitudeupdater
+# attitudeupdater2
+Updater script for the 2nd gen attitude control hardware
+
+## Updating base file
+Update device ID and serial number in id.json file
+`cd Documents` `cd attitude` `nano id.json` change ID and SN
+
+Update SSH service script
+`sudo nano /etc/systemd/system/attitudessh.service`
+change SN digits
+
+
+
+# Installation from scratch...
 
 ## Initial download:
 `cd ~/Documents && curl -L -O https://github.com/drewjsquared/attitudeupdater/archive/master.zip && unzip master.zip && mv attitudeupdater-main attitude && rm -r master.zip`
