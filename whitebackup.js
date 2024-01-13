@@ -17,12 +17,16 @@ const log = require('npmlog');
 var e131 = require('e131');
 var fs = require('fs');
 const https = require("https");
+const { SerialPort } = require('serialport');
 
 
 
 // ==================== VARIABLES ====================
 var DEVICE_ID = 0;
 var SERIALNUMBER = 'AC-00200XX';
+
+var LED_COLOR = 'C';
+var LAPTOP_MODE = (process.platform == 'darwin');
 
 var tickCounter = 1;
 var whiteCounter = 1;
@@ -129,6 +133,16 @@ setInterval(function () {
 								});
 							}
 
+
+							// carefully attempt to tell the LEDs on the front to be a certain color
+							try {
+								updateLEDpanel();
+							}
+							catch (err) {
+								log.error('LED ERROR', err)
+							}
+
+
 							// NOW send a quick ping to the attitude server to say that we are currently white only at this location
 							// first load device ID from id.json so we know which device this is
 							loadDeviceID(function () {
@@ -177,6 +191,39 @@ setInterval(function () {
     	}
 	});	
 }, INTERVAL);
+
+
+// updateLEDpanel - send a message via serial port to LED panel to change color, then close port
+function updateLEDpanel () {
+	// set up port path
+	var portPath = '/dev/ttyACM0';
+	if (LAPTOP_MODE) {
+		portPath = '/dev/cu.usbmodem1201';
+	}
+
+	// init port
+	const port = new SerialPort({ path: portPath, baudRate: 115200, autoOpen: false, });
+
+	// attempt to open port
+	port.open(function (err) {
+		if (err) {
+			log.error('WHITEBACKUP LED', err.message);
+			log.error('WHITEBACKUP LED', ' --- ' + new Date().toLocaleTimeString() + ' ---  err on open in init func')
+		} else {
+			log.info('WHITEBACKUP LED', 'Connected to Raspberry Pi Pico. ');
+
+			port.write(LED_COLOR, function(err) {
+				if (err) {
+					log.error('WHITEBACKUP LED', 'Error on write: ', err.message);
+				}
+
+				log.info('WHITEBACKUP LED', 'Data sent! Closing port...');
+
+				port.close();
+			});
+		}
+	});
+}
 
 
 // loadDeviceID - load Device ID from id.json
