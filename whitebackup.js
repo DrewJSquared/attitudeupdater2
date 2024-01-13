@@ -6,7 +6,7 @@
 
 // ==================== OPTIONS ====================
 var UNIVERSES = 8;
-var INTERVAL = 1000;
+var INTERVAL = 10000; // should be 10s
 var PROCESS_NAME = 'AttitudeControl2';
 var DEBUG = false;
 
