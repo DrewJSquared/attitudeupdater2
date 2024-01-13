@@ -3,6 +3,10 @@
 // copyright 2024 Drew Shipps, J Squared Systems
 
 
+// ** MANUAL UPDATE CHECKS SERVER BUT DOESN'T CARE WHETHER RESPONSE IS 1 OR 0
+// (useful for confirming that server works, but running update regardless of status on server)
+
+
 // imports
 var log = require('npmlog');
 var fs = require('fs');
@@ -337,16 +341,12 @@ function checkAttitudeServerForUpdate(callback) {
 				// 200 ok response so continue
 
 				// check data
-				if (data == '1') {
+				if (data == '1' || data == '0') {
 					// update!
-					log.http('AUTOUPDATE', '::: Update requested by attitude.lighting server! :::');
-					log.info('AUTOUPDATE', 'Running automatic update script callback...');
+					log.http('AUTOUPDATE', '*** MANUAL UPDATE: RUNNING REGARDLESS OF SERVER STATUS (which was ' + data + ')');
+					log.http('AUTOUPDATE', 'Running automatic update script callback...');
 
 					callback();
-				} else if (data == '0') {
-					// no need for update
-					log.info('AUTOUPDATE', 'No update needed :)');
-					log.info('AUTOUPDATE', 'Successfully completed autoupdate script!');
 				} else {
 					// unknown response
 					log.error('HTTPS', 'Unknown response from server:');
@@ -370,5 +370,6 @@ function checkAttitudeServerForUpdate(callback) {
 
 // restart - reboot device
 function restart() {
-	log.info('AUTOUPDATE', 'MANUAL update complete');
+	log.info('AUTOUPDATE', 'MANUAL update complete (you might want to `pm2 restart 0`)');
+	process.exit();
 }
