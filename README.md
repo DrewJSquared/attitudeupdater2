@@ -27,7 +27,7 @@ Once this script finishes, open a new terminal window so NVM will take effect.
 `cd ~/Documents/attitude && curl -L -O https://github.com/drewjsquared/attitudecontrol2/archive/master.zip && unzip master.zip && mv attitudecontrol2-main AttitudeControl && rm -r master.zip`
 
 ## Setup PM2 Processes
-`cd ~/Documents/attitude/AttitudeControl && pm2 start AttitudeControl2.js && cd ~/Documents/attitude && pm2 start autoupdate2.js && pm2 save && pm2 startup`
+`cd ~/Documents/attitude/AttitudeControl && pm2 start ecosystem.config.js && pm2 save && pm2 startup`
 (and copy/paste startup script to save startup)
 
 ## Setup SSH
