@@ -1,6 +1,6 @@
 // autoupdate2.js
 // automatic updater script for Attitude Control software 2nd gen
-// copyright 2023 Drew Shipps, J Squared Systems
+// copyright 2024 Drew Shipps, J Squared Systems
 
 
 // imports
@@ -32,8 +32,8 @@ var DOWNLOAD_TIMEOUT_LENGTH = 60000;
 // primary update function
 function updater() {
 	log.info('AUTOUPDATE', 'Automatic Update Script for Attitude Control Device Firmware');
-	log.info('AUTOUPDATE', ' +++ 2nd generation +++ ');
-	log.info('AUTOUPDATE', 'Copyright 2023 Drew Shipps, J Squared Systems');
+	log.info('AUTOUPDATE', ' +++ 2nd generation +++ (fixed timing 011324) ');
+	log.info('AUTOUPDATE', 'Copyright 2024 Drew Shipps, J Squared Systems');
 
 	updaterCounter++;
 	if (updaterCounter > 5) {
