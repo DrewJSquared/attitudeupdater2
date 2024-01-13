@@ -6,7 +6,7 @@
 
 // ==================== OPTIONS ====================
 var UNIVERSES = 8;
-var INTERVAL = 10000; // should be 10s
+var INTERVAL = 10000;
 var PROCESS_NAME = 'AttitudeControl2';
 var DEBUG = false;
 
@@ -15,10 +15,15 @@ var DEBUG = false;
 // ==================== IMPORT ====================
 const log = require('npmlog');
 var e131 = require('e131');
+var fs = require('fs');
+const https = require("https");
 
 
 
 // ==================== VARIABLES ====================
+var DEVICE_ID = 0;
+var SERIALNUMBER = 'AC-00200XX';
+
 var tickCounter = 1;
 var whiteCounter = 1;
 
@@ -123,6 +128,44 @@ setInterval(function () {
 									// console.log('sent callback');
 								});
 							}
+
+							// NOW send a quick ping to the attitude server to say that we are currently white only at this location
+							// first load device ID from id.json so we know which device this is
+							loadDeviceID(function () {
+								// (callback for once ID loaded)
+
+								// setup url
+								var url = 'https://attitude.lighting/api/devices/' + DEVICE_ID + '/whitebackup';
+
+								log.http('AUTOUPDATE', 'Attempting to let the attitude.lighting server know that we are white only.');
+								log.http('AUTOUPDATE', 'URL: ' + url);
+
+								// actual https get
+								https.get(url, resp => {
+									let data = "";
+
+									// process each chunk
+									resp.on("data", chunk => {
+										data += chunk;
+									});
+
+									// finished, do something with result
+									resp.on("end", () => {
+										if (resp.statusCode == 200) {
+											// 200 ok response so continue
+											log.http('WHITEBACKUP', 'Attitude.lighting server responded "' + data + '"');
+											log.http('WHITEBACKUP', 'HTTPS ping to attitude.lighting complete :)');
+										} else {
+											// anything else is bad news and means something is wrong with the server or request
+											log.error('HTTPS', 'Error status code is ' + resp.statusCode);
+											log.error('WHITEBACKUP', 'Failed, unable to inform the server of the white only status.');
+										}
+									});
+								}).on("error", err => {
+									log.error('HTTPS', 'Error: ' + err.message);
+									log.error('WHITEBACKUP', 'Unable to get ping attitude.lighting server about white only!');
+								});
+							});
 	    				}
 	    			}
 	    		}
@@ -134,3 +177,37 @@ setInterval(function () {
     	}
 	});	
 }, INTERVAL);
+
+
+// loadDeviceID - load Device ID from id.json
+function loadDeviceID(callback) {
+	var path = './id.json';
+
+	try {
+	  	let rawdata = fs.readFileSync(path);
+	
+	  	try {
+		  	let data = JSON.parse(rawdata);
+
+			DEVICE_ID = data.device_id;
+			SERIALNUMBER = data.serialnumber;
+
+			// if either does not update properly then crash the app
+			if (!Number.isInteger(DEVICE_ID) || typeof SERIALNUMBER != 'string') {
+				log.error('WHITEBACKUP', 'Failed to find Device ID and/or Serial Number. Web ping will not be possible.');
+			}
+
+		  	log.info('WHITEBACKUP', 'Device ID: ' + DEVICE_ID + ', Serial Number: ' + SERIALNUMBER);
+
+		  	callback();
+		}
+		catch(err) {
+		  	log.error('WHITEBACKUP', 'JSON.parse(rawdata) error or some other error inside callback...');
+		  	log.error('WHITEBACKUP', 'Error: ' + err.message);
+		}
+	}
+	catch(err) {
+	  	log.error('WHITEBACKUP', 'id.json file not found! Failed to load device ID!');
+	  	log.error('WHITEBACKUP', 'Error: ' + err.message);
+	}
+}
