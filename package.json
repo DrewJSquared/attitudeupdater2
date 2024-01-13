@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "download-git-repo": "^3.0.2",
+    "e131": "^1.1.3",
     "node-cron": "^3.0.2",
-    "npmlog": "^7.0.1"
+    "npmlog": "^7.0.1",
+    "serialport": "^12.0.0"
   }
 }
