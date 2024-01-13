@@ -71,6 +71,7 @@ function downloadFinished() {
 			checkForCurrent();
 			checkForBackup();
 
+			// give it 2 seconds to check for current and check for backup
 			setTimeout(function () {
 				if (currentCodeFound) {
 					if (backupCodeFound) {
@@ -86,6 +87,7 @@ function downloadFinished() {
 					}
 				}
 
+				// once we've cleared out current and backup as needed
 				setTimeout(function () {
 					if (currentCodeFound && !moveCurrentToBackupSuccess) {
 						log.error('AUTOUPDATE', 'Failed to move current code to backup folder. Force removing current code if exists...');
@@ -96,6 +98,7 @@ function downloadFinished() {
 						moveNewToCurrentSuccess = true;
 					});
 
+					// once moved new to current
 					setTimeout(function () {
 						if (moveNewToCurrentSuccess) {
 							log.info('AUTOUPDATE', 'Removing tmp folder...');
@@ -109,8 +112,8 @@ function downloadFinished() {
 							});
 						}
 					}, 5000);
-				}, 5000);
-			}, 1000);
+				}, 10000);
+			}, 2000);
 		} else {
 			log.error('AUTOUPDATE', 'Download new code timed out!');
 			restart();
