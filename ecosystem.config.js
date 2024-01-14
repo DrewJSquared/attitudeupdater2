@@ -4,8 +4,8 @@ module.exports = {
 			name   : "AttitudeControl2",
 			script : "AttitudeControl2.js",
 			cwd: "./AttitudeControl/",
-			min_uptime: 10000,
-			max_restarts: 10,
+			min_uptime: 60000,
+			max_restarts: 5,
 			// exp_backoff_restart_delay: 100,
 		},
 		{
@@ -17,6 +17,11 @@ module.exports = {
 			cwd: "./",
 			name   : "whitebackup",
 			script : "whitebackup.js",
+		},
+		{
+			cwd: "./",
+			name   : "reboot",
+			script : "reboot.js",
 		},
 	]
 }
