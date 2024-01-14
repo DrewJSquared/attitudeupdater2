@@ -78,19 +78,16 @@ function pingAttitudeServer() {
 
 				// 0 - reboot, 1 - manual update, 2 - config
 
-				// if reboot
-				if (split[0] == '1') {
-					log.notice('REBOOT SCRIPT', 'Attitude server said to REBOOT!');
-					console.log('+++++ REBOOT +++++');
+				// if config (needs to be first)
+				if (split[2] == '1') {
+					log.notice('REBOOT SCRIPT', 'Attitude server said to DELETE CONFIG!');
+					console.log('+++++ DELETE CONFIG +++++');
 
-					if (process.platform == 'darwin') {
-						console.log('shutdown now');
-					} else {
-						require('child_process').exec('sudo /sbin/shutdown now', function (msg) { console.log(msg) });
-					}
+					fs.rmSync('./AttitudeControl/config.json', { recursive: true, force: true });
+					log.info('REBOOT SCRIPT', 'Config deleted (i think)');
 				}
 
-				// if manual update
+				// if manual update (needs to be second)
 				if (split[1] == '1') {
 					log.notice('REBOOT SCRIPT', 'Attitude server said to MANUAL UPDATE!');
 					console.log('+++++ MANUAL UPDATE +++++');
@@ -121,10 +118,21 @@ function pingAttitudeServer() {
 					});
 				}
 
-				// if config
-				if (split[2] == '1') {
-					fs.rmSync('./AttitudeControl/config.json', { recursive: true, force: true });
+				// if reboot (needs to be last)
+				if (split[0] == '1') {
+					log.notice('REBOOT SCRIPT', 'Attitude server said to REBOOT!');
+					console.log('+++++ REBOOT +++++');
 
+					if (process.platform == 'darwin') {
+						console.log('shutdown now');
+					} else {
+						// if manually updating too, then wait 1 min to shutdown
+						if (split[1] == '1') {
+							require('child_process').exec('sudo /sbin/shutdown -r 1', function (msg) { console.log(msg) });
+						} else {
+							require('child_process').exec('sudo /sbin/shutdown now', function (msg) { console.log(msg) });
+						}
+					}
 				}
 			} else {
 				// anything else is bad news and means something is wrong with the server or request
