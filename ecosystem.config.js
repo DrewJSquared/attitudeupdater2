@@ -4,8 +4,9 @@ module.exports = {
 			name   : "AttitudeControl2",
 			script : "AttitudeControl2.js",
 			cwd: "./AttitudeControl/",
-			min_uptime: 60000,
-			max_restarts: 3,
+			autorestart: false,
+			// min_uptime: 60000,
+			// max_restarts: 3,
 			// exp_backoff_restart_delay: 100,
 		},
 		{
