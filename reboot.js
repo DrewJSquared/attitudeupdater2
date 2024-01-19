@@ -54,7 +54,7 @@ function pingAttitudeServer() {
 	// setup url
 	var url = 'https://attitude.lighting/api/devices/' + DEVICE_ID + '/rebootoptions';
 
-	log.http('REBOOT SCRIPT', 'Attempting to ping the attitude.lighting server for reboot options.');
+	log.http('REBOOT SCRIPT', 'Attempting to ping the attitude.lighting server for reboot options. (011924)');
 	log.http('REBOOT SCRIPT', 'URL: ' + url);
 
 	// actual https get
@@ -79,12 +79,26 @@ function pingAttitudeServer() {
 				// 0 - reboot, 1 - manual update, 2 - config
 
 				// if config (needs to be first)
+				// also added to restart pm2 
 				if (split[2] == '1') {
 					log.notice('REBOOT SCRIPT', 'Attitude server said to DELETE CONFIG!');
 					console.log('+++++ DELETE CONFIG +++++');
 
 					fs.rmSync('./AttitudeControl/config.json', { recursive: true, force: true });
-					log.info('REBOOT SCRIPT', 'Config deleted (i think)');
+					log.info('REBOOT SCRIPT', 'Config deleted! Restarting PM2...');
+
+					// attempt to pm2 restart 0
+					require('child_process').exec('pm2 restart 0', function (error, stdout, stderr) {
+						// catch error
+					    if (error !== null) {
+					        log.error('REBOOT SCRIPT', '`pm2 restart 0` exec error ' + error);
+					        console.log('exec error: ' + error);
+					    } else {
+					    	log.info('stdout', stdout);
+					    	log.info('stderr', stderr);
+							log.info('REBOOT SCRIPT', 'PM2 restart complete!');
+					    }
+					});
 				}
 
 				// if manual update (needs to be second)
@@ -121,7 +135,11 @@ function pingAttitudeServer() {
 				// if reboot (needs to be last)
 				if (split[0] == '1') {
 					log.notice('REBOOT SCRIPT', 'Attitude server said to REBOOT!');
-					console.log('+++++ REBOOT +++++');
+					console.log('+++++ REBOOT: FIRST DELETE CONFIG +++++');
+
+					fs.rmSync('./AttitudeControl/config.json', { recursive: true, force: true });
+					log.info('REBOOT SCRIPT', 'Config deleted! (so once the device boots it will load a fresh dataset) REBOOTING DEVICE...');
+					console.log('+++++ REBOOT: NOW REBOOT DEVICE +++++');
 
 					if (process.platform == 'darwin') {
 						console.log('shutdown now');
