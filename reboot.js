@@ -19,6 +19,7 @@ const https = require("https");
 // ==================== VARIABLES ====================
 var DEVICE_ID = 0;
 var SERIALNUMBER = 'AC-00200XX';
+var alreadyTriedASecondTime5s = false;
 
 
 
@@ -72,6 +73,9 @@ function pingAttitudeServer() {
 				// 200 ok response so continue
 				log.http('REBOOT SCRIPT', 'Attitude.lighting server responded "' + data + '"');
 				log.http('REBOOT SCRIPT', 'HTTPS ping to attitude.lighting complete :)');
+
+				// good response, so clear out already tried
+				alreadyTriedASecondTime5s = false;
 
 				var split = data.split(',');
 				// console.log(split);
@@ -161,6 +165,19 @@ function pingAttitudeServer() {
 	}).on("error", err => {
 		log.error('HTTPS', 'Error: ' + err.message);
 		log.error('REBOOT SCRIPT', 'Unable to get ping attitude.lighting server for reboot options! *OFFLINE*');
+
+		if (!alreadyTriedASecondTime5s) {
+			alreadyTriedASecondTime5s = true;
+			log.error('REBOOT SCRIPT', 'Trying again in 5 seconds...');
+
+			setTimeout(function () {
+				log.error('REBOOT SCRIPT', 'Trying again!');
+				pingAttitudeServer();
+			}, 5000);
+		} else {
+			log.error('REBOOT SCRIPT', 'Already tried twice!! Waiting until next interval to attempt again. *OFFLINE*');
+			alreadyTriedASecondTime5s = false;
+		}
 	});
 }
 
